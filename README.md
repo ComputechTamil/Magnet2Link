@@ -9,7 +9,7 @@ _Convert magnet links to direct download links instantly (Max 2GB support)_
 - ⏬ Direct downloads for **files under 4GB**
 - 🔐 No logs, no tracking
 - 📱 Telegram-native interface
-- ♻️ Supports batch processing (5 links/request)
+- ♻️ Supports batch processing (2 links/request)
 
 ## 🛠️ Usage
 1. Send magnet link:  
