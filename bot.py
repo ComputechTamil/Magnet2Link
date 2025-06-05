@@ -5,6 +5,8 @@ from aiogram.types import Message
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 bot=Bot(token="7588819582:AAHid_vQHYbpCI94DiPmWHJatnwuOza2Hu8",default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp=Dispatcher()
 @dp.message(Command("start"))
@@ -34,8 +36,33 @@ async def handle_magnet(message: Message):
             "⚠️ Please send a valid magnet link.\n\nExample:\n<code>magnet:?xt=urn:btih:123abc456def789...</code>",
             parse_mode="HTML")
         
-async def main():
-    print("Bot is Running")
-    await dp.start_polling(bot)
-if __name__=="__main__":
-    asyncio.run(main())
+async def on_startup(app: web.Application):
+    await bot.set_webhook("https://magnet2link.onrender.com/webhook")
+
+def main():
+    # Create aiohttp application
+    app = web.Application()
+    
+    # Register webhook handler
+    webhook_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+    )
+    webhook_handler.register(app, path="/webhook")
+    
+    # Setup application
+    setup_application(app, dp, bot=bot)
+    
+    # Add startup callback
+    app.on_startup.append(on_startup)
+    
+    # Add health check endpoint
+    async def health_check(request):
+        return web.Response(text="OK")
+    app.router.add_get("/health", health_check)
+    
+    # Run app (Render requires port 10000)
+    web.run_app(app, host="0.0.0.0", port=10000)
+
+if __name__ == "__main__":
+    main()
